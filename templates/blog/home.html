@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h1 class="mb-4">Latest Posts</h1>
+        <div id="posts-container">
+            {% for post in posts %}
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">{{ post.title }}</h2>
+                    <p class="card-text text-muted">
+                        Posted by {{ post.author.username }} on {{ post.created_at|date:"F d, Y" }}
+                    </p>
+                    <div class="post-content">
+                        {{ post.content|safe|truncatewords_html:50 }}
+                    </div>
+                    {% if post.slug %}  <!-- Check if slug exists -->
+                    <a href="{% url 'post_detail' post.slug %}" class="btn btn-primary">Read More</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p>No posts available.</p>
+            {% endfor %}
+        </div>
+        
+        {% if page_obj.has_next %}
+        <button id="load-more" class="btn btn-outline-primary mb-4" data-next-page="{{ page_obj.next_page_number }}">
+            Load More
+        </button>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

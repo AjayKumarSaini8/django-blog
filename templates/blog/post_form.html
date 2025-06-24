@@ -1,16 +1,328 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load crispy_forms_tags %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8">
-        <h1>{% if form.instance.pk %}Edit{% else %}Create{% endif %} Post</h1>
-        {{ form.media }}  <!-- Important for CKEditor -->
-        <form method="post" enctype="multipart/form-data">
+<div class="editor-wrapper">
+    <div class="editor-container">
+        <div class="editor-header">
+            <h1>{% if form.instance.pk %}Edit Story{% else %}New Story{% endif %}</h1>
+            <p class="subheader">Share your knowledge with the community</p>
+        </div>
+
+        {{ form.media }}
+        <form method="post" class="post-form" enctype="multipart/form-data">
             {% csrf_token %}
-            {{ form|crispy }}
-            <button type="submit" class="btn btn-primary">Save</button>
+            
+            <!-- Title Field -->
+            <div class="form-group">
+                <input type="text" name="title" id="id_title" class="title-input" 
+                       placeholder="Your compelling title..." required
+                       value="{{ form.title.value|default:'' }}">
+                <div class="focus-line"></div>
+            </div>
+
+            <!-- Content Field with CKEditor5 -->
+            <div class="form-group rich-text-group">
+                <label>Your Story</label>
+                {{ form.content }}
+            </div>
+
+            <!-- Status Field -->
+            <div class="form-footer">
+                <div class="status-selector">
+                    <label for="id_status">Status:</label>
+                    <select name="status" id="id_status" class="status-dropdown">
+                        <option value="draft" {% if form.status.value == 'draft' %}selected{% endif %}>Draft</option>
+                        <option value="published" {% if form.status.value == 'published' %}selected{% endif %}>Publish</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{% if form.instance.pk %}{% url 'post_detail' form.instance.slug %}{% else %}{% url 'home' %}{% endif %}" 
+                       class="cancel-btn">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i> {% if form.instance.pk %}Update{% else %}Publish{% endif %}
+                    </button>
+                </div>
+            </div>
         </form>
     </div>
 </div>
+
+<style>
+    /* Base Styles */
+    :root {
+        --primary: #4361ee;
+        --primary-dark: #3a0ca3;
+        --secondary: #7209b7;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --editor-bg: #ffffff;
+        --border-color: #e0e0e0;
+    }
+
+    body {
+        background-color: #f5f7fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--dark);
+    }
+
+    .editor-wrapper {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .editor-container {
+        background: var(--editor-bg);
+        border-radius: 12px;
+        box-shadow: 0 5px 30px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    /* Header Styles */
+    .editor-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border-color);
+        background: linear-gradient(135deg, #4361ee, #3a0ca3);
+        color: white;
+    }
+
+    .editor-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .editor-header .subheader {
+        margin: 0.5rem 0 0;
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+
+    /* Form Styles */
+    .post-form {
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.75rem;
+        position: relative;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #333;
+        font-size: 0.95rem;
+    }
+
+    .title-input {
+        width: 100%;
+        font-size: 2rem;
+        font-weight: 700;
+        border: none;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        background: transparent;
+    }
+
+    .title-input:focus {
+        outline: none;
+        border-bottom-color: transparent;
+    }
+
+    .title-input::placeholder {
+        color: #adb5bd;
+        font-weight: 500;
+    }
+
+    .focus-line {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--primary);
+        transition: width 0.3s ease;
+    }
+
+    .title-input:focus ~ .focus-line {
+        width: 100%;
+    }
+
+    /* CKEditor5 Customization */
+    .content-editor {
+        margin: 2rem 0;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .django-ckeditor-5 {
+        border: none !important;
+    }
+
+    /* Footer Styles */
+    .form-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .status-selector {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .status-selector label {
+        font-weight: 500;
+        color: var(--gray);
+    }
+
+    .status-dropdown {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: white;
+        font-size: 0.95rem;
+        cursor: pointer;
+    }
+
+    /* Button Styles */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .cancel-btn, .submit-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+
+    .cancel-btn {
+        background: var(--light);
+        color: var(--gray);
+        border: 1px solid var(--border-color);
+    }
+
+    .cancel-btn:hover {
+        background: #e9ecef;
+    }
+
+    .submit-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+    }
+
+    .submit-btn:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .editor-header {
+            padding: 1.25rem;
+        }
+        
+        .editor-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .title-input {
+            font-size: 1.5rem;
+        }
+        
+        .form-footer {
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+        
+        .form-actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+
+        .rich-text-group {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 1rem;
+        background: #fafafa;
+    }
+    }
+
+    @media (max-width: 480px) {
+        .post-form {
+            padding: 1.5rem;
+        }
+        
+        .form-actions {
+            flex-direction: column-reverse;
+            gap: 0.75rem;
+        }
+        
+        .cancel-btn, .submit-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form submission handling
+        const form = document.querySelector('.post-form');
+        if (form) {
+            form.addEventListener('submit', function() {
+                const submitBtn = document.querySelector('.submit-btn');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                }
+            });
+        }
+
+        // Auto-slug generation from title
+        const titleInput = document.getElementById('id_title');
+        const slugInput = document.getElementById('id_slug');
+        
+        if (titleInput && slugInput) {
+            titleInput.addEventListener('input', function() {
+                if (!slugInput.value || slugInput.value === slugInput.defaultValue) {
+                    const slug = this.value.toLowerCase()
+                        .replace(/[^\w\s-]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/--+/g, '-');
+                    slugInput.value = slug;
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

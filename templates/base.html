@@ -1,62 +1,164 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Django Blog</title>
+    <title>Modern Django Blog</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
-    <style>
-      .post-content img {
-        max-width: 100%;
-        height: auto;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div class="container">
-        <a class="navbar-brand" href="{% url 'home' %}">Django Blog</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
+    <!-- Base Template -->
+    <div class="page-container">
+      <!-- Navbar -->
+      <nav class="navbar">
+        <div class="nav-container">
+          <a href="{% url 'home' %}" class="logo">
+            <i class="fas fa-blog"></i>
+            CodeBlog
+          </a>
+
+          <button class="mobile-menu-btn">
+            <i class="fas fa-bars"></i>
+          </button>
+
+          <div class="nav-links">
+            <a href="{% url 'home' %}" class="nav-link">
+              <i class="fas fa-home"></i>
+              Home
+            </a>
             {% if user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'post_create' %}">New Post</a>
-            </li>
-            <li class="nav-item">
-              <form action="{% url 'logout' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="nav-link btn btn-link">
-                  Logout
-                </button>
-              </form>
-            </li>
+            <a href="{% url 'post_create' %}" class="nav-link">
+              <i class="fas fa-plus-circle"></i>
+              New Post
+            </a>
+            <form action="{% url 'logout' %}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                Logout
+              </button>
+            </form>
             {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'login' %}">Login</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'register' %}">Register</a>
-            </li>
+            <a class="nav-link" href="{% url 'login' %}">Login</a>
+            <a class="nav-link" href="{% url 'register' %}">Register</a>
             {% endif %}
-          </ul>
+          </div>
         </div>
+      </nav>
+
+      <!-- Content Block (Will be filled by child templates) -->
+      <div class="content-wrap">
+        <div class="container">{% block content %}{% endblock %}</div>
       </div>
-    </nav>
 
-    <div class="container mt-4">{% block content %}{% endblock %}</div>
+      <!-- Footer -->
+      <footer class="footer">
+        <div class="container">
+          <div class="footer-content">
+            <div class="footer-column">
+              <h3>About CodeBlog</h3>
+              <p>
+                A modern blogging platform for developers and tech enthusiasts.
+                Share your knowledge and connect with the community.
+              </p>
+              <div class="social-links">
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#"><i class="fab fa-discord"></i></a>
+              </div>
+            </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    {% block scripts %}{% endblock %}
+            <div class="footer-column">
+              <h3>Quick Links</h3>
+              <div class="footer-links">
+                <a href="#"><i class="fas fa-chevron-right"></i> Home</a>
+                <a href="#"
+                  ><i class="fas fa-chevron-right"></i> Popular Posts</a
+                >
+                <a href="#"
+                  ><i class="fas fa-chevron-right"></i> Recent Posts</a
+                >
+                <a href="#"><i class="fas fa-chevron-right"></i> About Us</a>
+              </div>
+            </div>
+
+            <div class="footer-column">
+              <h3>Categories</h3>
+              <div class="footer-links">
+                <a href="#"><i class="fas fa-chevron-right"></i> Django</a>
+                <a href="#"><i class="fas fa-chevron-right"></i> Python</a>
+                <a href="#"><i class="fas fa-chevron-right"></i> JavaScript</a>
+                <a href="#"
+                  ><i class="fas fa-chevron-right"></i> Web Development</a
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-bottom">
+            <p>
+              &copy; 2025 CodeBlog. All rights reserved. Made with
+              <i class="fas fa-heart" style="color: #e74c3c"></i> for developers
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Home Template -->
+    <script>
+      // This script would normally be in a separate file
+      document.addEventListener("DOMContentLoaded", function () {
+        // Mobile menu toggle
+        const mobileMenuBtn = document.querySelector(".mobile-menu-btn");
+        const navLinks = document.querySelector(".nav-links");
+
+        if (mobileMenuBtn && navLinks) {
+          mobileMenuBtn.addEventListener("click", function () {
+            navLinks.classList.toggle("active");
+          });
+        }
+
+        // URL-based dynamic page title
+        const updatePageTitle = () => {
+          const path = window.location.pathname;
+          let title = "CodeBlog";
+
+          if (path.includes("/posts/")) {
+            title = "Blog Post | " + title;
+          } else if (path.includes("/edit")) {
+            title = "Edit Post | " + title;
+          } else if (path.includes("/new")) {
+            title = "New Post | " + title;
+          }
+
+          document.title = title;
+        };
+
+        updatePageTitle();
+
+        // Simulate dynamic content loading
+        const postsContainer = document.getElementById("posts-container");
+        if (postsContainer && postsContainer.children.length === 0) {
+          postsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-file-alt"></i>
+                        <h3>No posts available yet</h3>
+                        <p>Be the first to share your knowledge!</p>
+                    </div>
+                `;
+        }
+      });
+    </script>
   </body>
 </html>

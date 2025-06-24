@@ -1,6 +1,19 @@
 from django import forms
 from .models import BlogPost
 from django_ckeditor_5.widgets import CKEditor5Widget
+from .models import Comment
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ('content',)
+        widgets = {
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Write your comment here...'
+            })
+        }
 
 class BlogPostForm(forms.ModelForm):
     class Meta:
@@ -12,9 +25,3 @@ class BlogPostForm(forms.ModelForm):
                 config_name="extends"
             )
         }
-    
-    # REMOVE THIS __init__ METHOD COMPLETELY
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     # Make sure slug field is not required in the form
-    #     self.fields['slug'].required = False

@@ -17,6 +17,12 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from django.utils.text import slugify
 
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from .models import Like, Comment
+from .forms import CommentForm
+
 @csrf_exempt
 @login_required
 def custom_upload(request):
@@ -50,6 +56,39 @@ def custom_upload(request):
     # Call the original upload handler
     return image_upload(request)
 
+@login_required
+@require_POST
+def like_post(request, slug):
+    post = get_object_or_404(BlogPost, slug=slug)
+    like, created = Like.objects.get_or_create(post=post, user=request.user)
+    if not created:
+        like.delete()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'like_count': post.like_count,
+            'is_liked': created
+        })
+    return redirect('post_detail', slug=slug)
+
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+
+@login_required
+@require_POST
+def add_comment(request, slug):
+    post = get_object_or_404(BlogPost, slug=slug)
+    form = CommentForm(request.POST)
+    
+    if form.is_valid():
+        comment = form.save(commit=False)
+        comment.post = post
+        comment.author = request.user
+        comment.save()
+    
+    return redirect('post_detail', slug=slug)
+
 # Class-based view alternative (optional)
 class CustomUploadView(View):
     @method_decorator(csrf_exempt)
@@ -72,11 +111,26 @@ class BlogPostListView(ListView):
         if self.request.user.is_authenticated:
             user_posts = BlogPost.objects.filter(author=self.request.user)
             queryset = queryset | user_posts
+
+        # Add search functionality
+        search_query = self.request.GET.get('q')
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query) | 
+                Q(content__icontains=search_query)
+            )
+
         return queryset.distinct().order_by('-created_at')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('q', '')
+        return context
 
 class BlogPostDetailView(DetailView):
     model = BlogPost
     template_name = 'blog/post_detail.html'
+    context_object_name = 'post'
     slug_field = 'slug'
     
     def get_queryset(self):
@@ -87,6 +141,12 @@ class BlogPostDetailView(DetailView):
             Q(status='published') | 
             Q(author=self.request.user)
         )
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['comment_form'] = CommentForm()
+        context['user_has_liked'] = self.object.user_has_liked(self.request.user)
+        return context
 
 class BlogPostCreateView(LoginRequiredMixin, CreateView):
     form_class = BlogPostForm
@@ -106,11 +166,13 @@ class BlogPostCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
     
     def get_success_url(self):
-        return reverse('post_detail', kwargs={'slug': self.object.slug})
+        return reverse('home')
 
 class BlogPostUpdateView(LoginRequiredMixin, UpdateView):
+    model = BlogPost 
     form_class = BlogPostForm  # Use form_class instead of fields
     template_name = 'blog/post_form.html'
+    context_object_name = 'form'
     slug_field = 'slug'
     
     def get_queryset(self):

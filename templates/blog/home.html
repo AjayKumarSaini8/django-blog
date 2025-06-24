@@ -1,35 +1,478 @@
-{% extends 'base.html' %}
-
-{% block content %}
-<div class="row">
-    <div class="col-md-8">
-        <h1 class="mb-4">Latest Posts</h1>
-        <div id="posts-container">
-            {% for post in posts %}
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2 class="card-title">{{ post.title }}</h2>
-                    <p class="card-text text-muted">
-                        Posted by {{ post.author.username }} on {{ post.created_at|date:"F d, Y" }}
-                    </p>
-                    <div class="post-content">
-                        {{ post.content|safe|truncatewords_html:50 }}
-                    </div>
-                    {% if post.slug %}  <!-- Check if slug exists -->
-                    <a href="{% url 'post_detail' post.slug %}" class="btn btn-primary">Read More</a>
-                    {% endif %}
-                </div>
-            </div>
-            {% empty %}
-            <p>No posts available.</p>
-            {% endfor %}
-        </div>
-        
-        {% if page_obj.has_next %}
-        <button id="load-more" class="btn btn-outline-primary mb-4" data-next-page="{{ page_obj.next_page_number }}">
-            Load More
-        </button>
-        {% endif %}
-    </div>
+{% extends 'base.html' %} {% block content %}
+<div class="hero">
+  <div class="container">
+    <h1>Discover Our Latest Articles</h1>
+    <p>Explore insights, tutorials, and stories from our community</p>
+  </div>
 </div>
+
+<div class="container">
+  <div class="posts-header">
+    <h2>Latest Posts</h2>
+    <div class="search-container">
+      <form method="get" action="{% url 'home' %}" class="search-form">
+        <input
+          type="text"
+          name="q"
+          placeholder="Search posts..."
+          value="{{ search_query }}"
+          class="search-input"
+        />
+        <button type="submit" class="search-btn">
+          <i class="fas fa-search"></i>
+        </button>
+      </form>
+      {% if user.is_authenticated %}
+      <a href="{% url 'post_create' %}" class="btn-new-post">
+        <i class="fas fa-plus"></i> New Post
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div id="posts-container">
+    {% if search_query and not posts %}
+    <div class="empty-state">
+      <i class="fas fa-search"></i>
+      <h3>No results found for "{{ search_query }}"</h3>
+      <p>Try different search terms</p>
+    </div>
+    {% else %} {% for post in posts %}
+    <article class="post-card">
+      <div class="post-card__header">
+        <div class="post-meta">
+          <span class="post-author">
+            <i class="fas fa-user"></i> {{ post.author.username }}
+          </span>
+          <span class="post-date">
+            <i class="fas fa-calendar-alt"></i> {{ post.created_at|date:"F d, Y" }}
+          </span>
+        </div>
+        <h3 class="post-title">{{ post.title }}</h3>
+      </div>
+
+      <div class="post-content">
+        {{ post.content|safe|truncatewords_html:50 }}
+      </div>
+
+      {% if post.slug %}
+      <!-- In your post card, add this near the post actions: -->
+      <div class="post-stats">
+        <span class="likes-count">
+          <i class="fas fa-heart"></i> {{ post.like_count }}
+        </span>
+        <span class="comments-count">
+          <i class="fas fa-comment"></i> {{ post.comment_count }}
+        </span>
+      </div>
+      <div class="post-actions">
+        <a href="{% url 'post_detail' post.slug %}" class="btn-read-more">
+          Read More <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      {% endif %}
+    </article>
+    {% empty %}
+    <div class="empty-state">
+      <i class="fas fa-file-alt"></i>
+      <h3>No posts available yet</h3>
+      {% if user.is_authenticated %}
+      <p>Be the first to share your knowledge!</p>
+      <a href="{% url 'post_create' %}" class="btn-new-post">
+        <i class="fas fa-plus"></i> Create Your First Post
+      </a>
+      {% else %}
+      <p>Register or login to create the first post</p>
+      {% endif %}
+    </div>
+    {% endfor %} {% endif %}
+  </div>
+
+  {% if is_paginated %}
+  <div class="pagination">
+    {% if page_obj.has_previous %}
+    <a
+      href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
+      class="page-link"
+    >
+      <i class="fas fa-chevron-left"></i> Previous
+    </a>
+    {% endif %}
+
+    <span class="page-current">
+      Page {{ page_obj.number }} of {{ paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+    <a
+      href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}"
+      class="page-link"
+    >
+      Next <i class="fas fa-chevron-right"></i>
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<style>
+  /* Home Page Specific Styles */
+  .hero {
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
+    color: white;
+    padding: 5rem 0;
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-size: 2.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .hero p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .posts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .search-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .search-form {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .search-form:focus-within {
+    border-color: #4361ee;
+    box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+  }
+
+  .search-input {
+    padding: 0.6rem 1rem;
+    border: none;
+    outline: none;
+    min-width: 250px;
+  }
+
+  .search-btn {
+    background: #4361ee;
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .search-btn:hover {
+    background: #3a56d4;
+  }
+
+  /* Highlight search terms in results */
+  .highlight {
+    background-color: #fff9c4;
+    padding: 0.1rem 0.2rem;
+    border-radius: 3px;
+  }
+
+  @media (max-width: 768px) {
+    .search-container {
+      flex-direction: column;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .search-form {
+      width: 100%;
+    }
+
+    .search-input {
+      flex-grow: 1;
+    }
+  }
+
+  .posts-header h2 {
+    font-size: 1.8rem;
+    color: #212529;
+  }
+
+  .btn-new-post {
+    background: #4361ee;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .post-stats {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+
+  .post-stats i {
+    margin-right: 0.3rem;
+  }
+
+  .btn-new-post:hover {
+    background: #3a56d4;
+    transform: translateY(-2px);
+    color: white;
+  }
+
+  #posts-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .post-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+  }
+
+  .post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  .post-card__header {
+    margin-bottom: 1.5rem;
+  }
+
+  .post-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+
+  .post-meta i {
+    margin-right: 0.3rem;
+  }
+
+  .post-title {
+    font-size: 1.5rem;
+    color: #212529;
+    margin: 0;
+  }
+
+  .post-content {
+    color: #495057;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin: 1rem 0;
+  }
+
+  .post-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .btn-read-more {
+    background: #4361ee;
+    color: white;
+    padding: 0.6rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-read-more:hover {
+    background: #3a56d4;
+    transform: translateY(-2px);
+    color: white;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e9ecef;
+    grid-column: 1 / -1;
+  }
+
+  .empty-state i {
+    font-size: 3rem;
+    color: #adb5bd;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state h3 {
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 3rem 0;
+  }
+
+  .page-link {
+    padding: 0.6rem 1.2rem;
+    border-radius: 4px;
+    background: white;
+    color: #4361ee;
+    border: 1px solid #dee2e6;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .page-link:hover {
+    background: #f8f9fa;
+  }
+
+  .page-current {
+    padding: 0.6rem 1.2rem;
+    color: #495057;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .hero {
+      padding: 3rem 0;
+    }
+
+    .hero h1 {
+      font-size: 2.2rem;
+    }
+
+    .posts-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .hero {
+      padding: 2.5rem 1rem;
+    }
+
+    .hero h1 {
+      font-size: 1.8rem;
+    }
+
+    .post-meta {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .pagination {
+      flex-wrap: wrap;
+    }
+  }
+</style>
+
+<script>
+      // Highlight search terms in results
+  const highlightSearchTerms = () => {
+      const searchQuery = "{{ search_query }}";
+      if (searchQuery) {
+          const regex = new RegExp(searchQuery, 'gi');
+          const postTitles = document.querySelectorAll('.post-title');
+          const postContents = document.querySelectorAll('.post-content');
+
+          postTitles.forEach(el => {
+              el.innerHTML = el.textContent.replace(regex, match =>
+                  `<span class="highlight">${match}</span>`
+              );
+          });
+
+          postContents.forEach(el => {
+              el.innerHTML = el.textContent.replace(regex, match =>
+                  `<span class="highlight">${match}</span>`
+              );
+          });
+      }
+  };
+
+  document.addEventListener('DOMContentLoaded', highlightSearchTerms);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add animation to post cards when they come into view
+        const postCards = document.querySelectorAll('.post-card');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        postCards.forEach(card => {
+            card.style.opacity = 0;
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.5s ease';
+            observer.observe(card);
+        });
+
+        // Update active state for pagination
+        const currentPage = {{ page_obj.number }};
+        const pageLinks = document.querySelectorAll('.page-link');
+
+        pageLinks.forEach(link => {
+            const pageNum = link.getAttribute('href')?.split('page=')[1];
+            if (pageNum && parseInt(pageNum) === currentPage) {
+                link.classList.add('active');
+                link.style.pointerEvents = 'none';
+            }
+        });
+    });
+</script>
 {% endblock %}

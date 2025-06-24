@@ -20,6 +20,22 @@ class BlogPost(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     
+    @property
+    def like_count(self):
+        return self.likes.count()
+    
+    @property
+    def comment_count(self):
+        return self.comments.count()
+    
+    @property
+    def user_has_liked(self):
+        def check_like(user):
+            if user.is_authenticated:
+                return self.likes.filter(user=user).exists()
+            return False
+        return check_like
+    
     class Meta:
         ordering = ['-created_at']
 
@@ -38,3 +54,27 @@ class BlogPost(models.Model):
     
     def __str__(self):
         return self.title
+
+class Comment(models.Model):
+    post = models.ForeignKey('BlogPost', on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Comment by {self.author.username} on {self.post.title}"
+
+class Like(models.Model):
+    post = models.ForeignKey('BlogPost', on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('post', 'user')  # Prevent duplicate likes
+    
+    def __str__(self):
+        return f"Like by {self.user.username} on {self.post.title}"

@@ -80,7 +80,11 @@ WSGI_APPLICATION = 'blog_project.wsgi.application'
 # Database
 # Database Configuration (for both local and production)
 DATABASES = {
-    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True,  # Forces SSL, aligning with Aiven's requirement
+    )
 }
 
 # Password validation

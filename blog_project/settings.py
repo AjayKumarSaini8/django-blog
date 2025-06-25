@@ -83,8 +83,7 @@ DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
         conn_max_age=600,
-        engine='django.db.backends.mysql',
-        options={'ssl': {'ssl_mode': 'REQUIRED'}},  # Explicitly set ssl_mode
+        ssl_require=True,  # Enforces SSL, which Aiven requires
     )
 }
 

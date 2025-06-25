@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-v+huvv8nqf!lu^$*37(q87qyy7w=v#$32fjn15jtu-t3(8@_91'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-v+huvv8nqf!lu^$*37(q87qyy7w=v#$32fjn15jtu-t3(8@_91')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -80,18 +80,7 @@ WSGI_APPLICATION = 'blog_project.wsgi.application'
 # Database
 # Database Configuration (for both local and production)
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('MYSQLDATABASE', 'blog_db'),
-        'USER': os.getenv('MYSQLUSER', 'blog_user'),
-        'PASSWORD': os.getenv('MYSQLPASSWORD', 'root'),
-        'HOST': os.getenv('MYSQLHOST', 'localhost'),
-        'PORT': os.getenv('MYSQLPORT', '3306'),
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        }
-    }
+    'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
 }
 
 # Password validation
@@ -227,21 +216,19 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
-# Security Settings (for production you should set these differently)
+# Security and Hosts
 if DEBUG:
-    # In development, allow all hosts
     ALLOWED_HOSTS = ['*']
-    # Disable HTTPS only in development
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 else:
-    # Production security settings
+    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'ajayblog.onrender.com').split(',')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
+    SECURE_HSTS_PRELOAD = False 
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
-ALLOWED_HOSTS = ['ajayblog.onrender.com']  # Will be provided by Render
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'ajayblog.onrender.com').split(',')  # Will be provided by Render

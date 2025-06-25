@@ -232,3 +232,17 @@ else:
 
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'django-blog-alqr.onrender.com').split(',')  # Will be provided by Render
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}

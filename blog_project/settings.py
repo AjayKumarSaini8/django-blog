@@ -222,7 +222,7 @@ if DEBUG:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
 else:
-    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'https://ajayblog-2hho.onrender.com').split(',')
+    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'https://django-blog-alqr.onrender.com').split(',')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000
@@ -231,4 +231,4 @@ else:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'https://ajayblog-2hho.onrender.com').split(',')  # Will be provided by Render
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'https://django-blog-alqr.onrender.com').split(',')  # Will be provided by Render

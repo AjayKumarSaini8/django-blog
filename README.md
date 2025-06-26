@@ -5,37 +5,7 @@
 
 A full-featured blog application built with Django.
 
-## Features
-- User authentication (Login/Register)
-- Create, edit, delete blog posts
-- Post categories and tags
-- Comments system
-- Responsive design
-
-## Installation
-```bash
-# Clone repository
-git clone https://github.com/YOUR_USERNAME/django-blog.git
-cd django-blog
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-venv\Scripts\activate     # Windows
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run migrations
-python manage.py migrate
-
-# Create superuser
-python manage.py createsuperuser
-
-# Run development server
-python manage.py runserver
-
-User Guide
+## User Guide
 1. Registration and Authentication
 Register: Click "Register" in the navigation bar to create an account
 
@@ -72,3 +42,33 @@ Confirm deletion
 Home Page: Shows all published posts in chronological order
 
 Search: Use the search bar to find posts by title or content
+
+## Features
+- User authentication (Login/Register)
+- Create, edit, delete blog posts
+- Post categories and tags
+- Comments system
+- Responsive design
+
+## Installation
+```bash
+# Clone repository
+git clone https://github.com/YOUR_USERNAME/django-blog.git
+cd django-blog
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run migrations
+python manage.py migrate
+
+# Create superuser
+python manage.py createsuperuser
+
+# Run development server
+python manage.py runserver

@@ -33,8 +33,8 @@
                 <div class="status-selector">
                     <label for="id_status">Status:</label>
                     <select name="status" id="id_status" class="status-dropdown">
-                        <option value="draft" {% if form.status.value == 'draft' %}selected{% endif %}>Draft</option>
                         <option value="published" {% if form.status.value == 'published' %}selected{% endif %}>Publish</option>
+                        <option value="draft" {% if form.status.value == 'draft' %}selected{% endif %}>Draft</option>
                     </select>
                 </div>
 

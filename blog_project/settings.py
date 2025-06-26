@@ -141,6 +141,9 @@ SIMPLE_JWT = {
 # CKEditor 5 Configuration
 CKEDITOR_5_CONFIGS = {
     'default': {
+        'js': [
+            'https://cdn.ckeditor.com/ckeditor5/40.0.0/super-build/ckeditor.js'
+        ],
         'toolbar': ['heading', '|', 'bold', 'italic', 'link',
                     'bulletedList', 'numberedList', 'blockQuote', 'imageUpload'],
         'image': {

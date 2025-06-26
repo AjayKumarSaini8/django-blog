@@ -34,3 +34,41 @@ python manage.py createsuperuser
 
 # Run development server
 python manage.py runserver
+
+User Guide
+1. Registration and Authentication
+Register: Click "Register" in the navigation bar to create an account
+
+Login: Click "Login" and enter your credentials
+
+Logout: Click "Logout" in the navigation menu
+
+2. Creating and Managing Blog Posts
+Create a Post (authenticated users only):
+
+Click "New Post" in the navigation bar
+
+Fill in the title and content using the rich text editor
+
+Click "Publish"
+
+Edit a Post (author only):
+
+Navigate to your post
+
+Click the "Edit" button
+
+Make your changes and click "Update"
+
+Delete a Post (author only):
+
+Navigate to your post
+
+Click the "Delete" button
+
+Confirm deletion
+
+3. Browsing Content
+Home Page: Shows all published posts in chronological order
+
+Search: Use the search bar to find posts by title or content
